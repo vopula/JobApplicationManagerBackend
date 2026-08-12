@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        DOCKERHUB_CREDENTIALS = credentials('jenkins-local-to-docker-hub')
         IMAGE_NAME = "job-application-manager-backend"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
@@ -153,6 +154,19 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: 'iac-report.json', allowEmptyArchive: true
                 }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker push ${IMAGE_NAME}:latest"
             }
         }
     }
