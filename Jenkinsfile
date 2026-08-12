@@ -71,10 +71,8 @@ pipeline {
                         --ignore-unfixed \
                         ${IMAGE_NAME}:${IMAGE_TAG}
 
-                set +e
                 docker start -a trivy-${BUILD_NUMBER}
                 EXIT_CODE=$?
-                set -e
 
                 docker cp trivy-${BUILD_NUMBER}:/tmp/trivy-report.json ./trivy-report.json
                 docker rm trivy-${BUILD_NUMBER}
