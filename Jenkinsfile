@@ -58,7 +58,7 @@ pipeline {
             }
         }
 
-        stage('Trivy Sca Scan') {
+        stage('Trivy Sca And Image Scan') {
             steps {
                 sh '''
                 docker create --name trivy-${BUILD_NUMBER} \
@@ -85,6 +85,41 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Trivy IaC Scan') {
+            steps {
+                sh '''
+                    rm -rf ./_iac_ctx && mkdir -p ./_iac_ctx
+                    cp Dockerfile docker-compose.yml ./_iac_ctx/
+
+                    docker create --name iac-${BUILD_NUMBER} \
+                        aquasec/trivy config \
+                            --format json \
+                            --output /tmp/iac-report.json \
+                            --severity CRITICAL,HIGH \
+                            --exit-code 1 \
+                            /workspace
+
+                    docker cp ./_iac_ctx iac-${BUILD_NUMBER}:/workspace
+
+                    set +e
+                    docker start -a iac-${BUILD_NUMBER}
+                    EXIT_CODE=$?
+                    set -e
+
+                    docker cp iac-${BUILD_NUMBER}:/tmp/iac-report.json ./iac-report.json
+                    docker rm iac-${BUILD_NUMBER}
+                    rm -rf ./_iac_ctx
+
+                    exit $EXIT_CODE
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'iac-report.json', allowEmptyArchive: true
                 }
             }
         }
