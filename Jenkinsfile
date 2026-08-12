@@ -52,6 +52,12 @@ pipeline {
             }
         }
 
+        stage('Build Production Image') {
+            steps {
+                sh 'docker build --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+            }
+        }
+
         stage('Trivy Sca Scan') {
             steps {
                 sh '''
@@ -78,12 +84,6 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
                 }
-            }
-        }
-
-        stage('Build Production Image') {
-            steps {
-                sh 'docker build --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
     }
