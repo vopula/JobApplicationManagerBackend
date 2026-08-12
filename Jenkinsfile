@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Build Test Image') {
             steps {
-                sh 'docker build --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
+                sh 'docker build --no-cache --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
             }
         }
 
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Build Production Image') {
             steps {
-                sh 'docker build --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                sh 'docker build --no-cache --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
 
@@ -71,8 +71,10 @@ pipeline {
                         --ignore-unfixed \
                         ${IMAGE_NAME}:${IMAGE_TAG}
 
+                set +e
                 docker start -a trivy-${BUILD_NUMBER}
                 EXIT_CODE=$?
+                set -e
 
                 docker cp trivy-${BUILD_NUMBER}:/tmp/trivy-report.json ./trivy-report.json
                 docker rm trivy-${BUILD_NUMBER}
