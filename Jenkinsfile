@@ -74,7 +74,7 @@ pipeline {
                 docker start -a trivy-${BUILD_NUMBER}
                 EXIT_CODE=$?
 
-                docker cp trivy-${BUILD_NUMBER}:/tmp/trivy-report.json ./trivy-report.json || true
+                docker cp trivy-${BUILD_NUMBER}:/tmp/trivy-report.json ./trivy-report.json
                 docker rm trivy-${BUILD_NUMBER}
 
                 exit $EXIT_CODE
