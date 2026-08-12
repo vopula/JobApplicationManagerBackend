@@ -19,9 +19,11 @@ pipeline {
                     docker run --rm \
                         -v "$WORKSPACE/tests:/code/tests:ro" \
                         -v "$WORKSPACE:/results" \
+                        -e PYTHONPATH=/code \
+                        -e DATABASE_URL="postgresql://onlyfortest:test@localhost:5432/test" \
                         -w /code \
                         ${IMAGE_NAME}:${IMAGE_TAG} \
-                        pytest --junitxml=/results/test-results.xml
+                        pytest tests --junitxml=/results/test-results.xml
                 '''
             }
             post {
