@@ -52,6 +52,35 @@ pipeline {
             }
         }
 
+        stage('Trivy Sca Scan') {
+            steps {
+                sh '''
+                docker create --name trivy-${BUILD_NUMBER} \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy image \
+                        --format json \
+                        --output /tmp/trivy-report.json \
+                        --severity CRITICAL,HIGH \
+                        --exit-code 1 \
+                        --ignore-unfixed \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
+
+                docker start -a trivy-${BUILD_NUMBER}
+                EXIT_CODE=$?
+
+                docker cp trivy-${BUILD_NUMBER}:/tmp/trivy-report.json ./trivy-report.json || true
+                docker rm trivy-${BUILD_NUMBER}
+
+                exit $EXIT_CODE
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Build Production Image') {
             steps {
                 sh 'docker build --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
