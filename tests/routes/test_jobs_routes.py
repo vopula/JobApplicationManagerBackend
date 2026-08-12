@@ -19,7 +19,7 @@ def test_preview_job_ingest_success(monkeypatch):
             "location": "Pune",
             "work_mode": "hybrid",
             "job_description_preview": "Build backend systems using Python.",
-            "job_summary": ""
+            "job_summary": None
         }
 
     monkeypatch.setattr(
@@ -41,7 +41,7 @@ def test_preview_job_ingest_success(monkeypatch):
     assert data["location"] == "Pune"
     assert data["work_mode"] == "hybrid"
     assert data["job_description_preview"] == "Build backend systems using Python."
-    assert data["job_summary"] == ""
+    assert data["job_summary"] is None
 
 
 def test_preview_job_ingest_fetch_failure(monkeypatch):

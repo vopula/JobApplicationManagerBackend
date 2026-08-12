@@ -68,6 +68,9 @@ def test_extract_job_data_from_url_success(monkeypatch):
     def mock_extract_location(soup, text: str):
         return "Pune"
 
+    def mock_extract_job_data_with_ai(job_text: str):
+        return AIJobExtractionResponse()
+
     monkeypatch.setattr(
         "app.services.ingestion_service.fetch_job_page",
         mock_fetch_job_page,
@@ -95,6 +98,10 @@ def test_extract_job_data_from_url_success(monkeypatch):
     monkeypatch.setattr(
         "app.services.ingestion_service.extract_location",
         mock_extract_location,
+    )
+    monkeypatch.setattr(
+        "app.services.ingestion_service.extract_job_data_with_AI",
+        mock_extract_job_data_with_ai,
     )
 
     result = extract_job_data_from_url("https://example.com/job/123")
