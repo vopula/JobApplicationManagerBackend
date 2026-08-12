@@ -24,8 +24,9 @@ dependencies = [
 pythonpath = ["."]
 
 [tool.coverage.run]
-source = ["app"]
-omit = ["app/static/*"]
+include = ["app/*"]
+omit = ["app/static/*", "main.py"]
+relative_files = true
 
 [tool.coverage.report]
 exclude_lines = [

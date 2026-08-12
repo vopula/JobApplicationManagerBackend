@@ -21,7 +21,7 @@ pipeline {
                         -e DATABASE_URL="postgresql://onlyfortest:test@localhost:5432/test" \
                         -e ENABLE_AI_EXTRACTION=false \
                         ${IMAGE_NAME}:${IMAGE_TAG}-test \
-                        pytest tests --cov=app --cov-report=xml:/code/coverage.xml --junitxml=/code/test-results.xml
+                        pytest tests --cov=. --cov-report=xml:/code/coverage.xml --junitxml=/code/test-results.xml
 
                     docker start -a test-${BUILD_NUMBER} || true
                     docker cp test-${BUILD_NUMBER}:/code/test-results.xml ./test-results.xml
