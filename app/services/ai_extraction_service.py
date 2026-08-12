@@ -8,12 +8,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+AI_EXTRACTION_ENABLED = os.getenv("ENABLE_AI_EXTRACTION", "true").lower() not in ("false", "0", "no")
+
 client = OpenAI(
     api_key=os.getenv("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1",
 )
 
 def extract_job_data_with_AI(job_text: str) -> AIJobExtractionResponse:
+    if not AI_EXTRACTION_ENABLED:
+        return AIJobExtractionResponse()
+
     prompt = build_AI_extraction_prompt(job_text)
     
     llm_response = call_llm(prompt)
