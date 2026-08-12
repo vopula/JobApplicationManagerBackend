@@ -93,7 +93,7 @@ pipeline {
             steps {
                 sh '''
                     rm -rf ./_iac_ctx && mkdir -p ./_iac_ctx
-                    cp Dockerfile docker-compose.yml ./_iac_ctx/
+                    cp Dockerfile ./_iac_ctx/
 
                     docker create --name iac-${BUILD_NUMBER} \
                         aquasec/trivy config \
