@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Build Test Image') {
             steps {
-                sh 'docker build --no-cache --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
+                sh 'docker build --no-cache --pull --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
             }
         }
 
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Build Production Image') {
             steps {
-                sh 'docker build --no-cache --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                sh 'docker build --no-cache --pull --target final -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
 
