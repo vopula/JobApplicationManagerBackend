@@ -1,0 +1,25 @@
+# Bytecode
+__pycache__/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Temporary files
+tmp/
+temp/
+.cache/
