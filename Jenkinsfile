@@ -19,6 +19,7 @@ pipeline {
                     docker create --name test-${BUILD_NUMBER} \
                         -e PYTHONPATH=/code \
                         -e DATABASE_URL="postgresql://onlyfortest:test@localhost:5432/test" \
+                        -e GROQ_API_KEY="dummy-test-key" \
                         ${IMAGE_NAME}:${IMAGE_TAG}-test \
                         pytest tests --junitxml=/code/test-results.xml
 
