@@ -7,6 +7,38 @@ pipeline {
     }
 
     stages {
+        stage('Trivy Secret Scan') {
+            steps {
+                sh '''
+                    docker create --name secret-${BUILD_NUMBER} \
+                        aquasec/trivy fs \
+                            --scanners secret \
+                            --format json \
+                            --output /tmp/secret-report.json \
+                            --exit-code 1 \
+                            --skip-dirs .git \
+                            /workspace
+
+                    docker cp . secret-${BUILD_NUMBER}:/workspace
+
+                    set +e
+                    docker start -a secret-${BUILD_NUMBER}
+                    EXIT_CODE=$?
+                    set -e
+
+                    docker cp secret-${BUILD_NUMBER}:/tmp/secret-report.json ./secret-report.json
+                    docker rm secret-${BUILD_NUMBER}
+
+                    exit $EXIT_CODE
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'secret-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Build Test Image') {
             steps {
                 sh 'docker build --no-cache --pull --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
