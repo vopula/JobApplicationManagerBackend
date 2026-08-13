@@ -174,6 +174,7 @@ pipeline {
     post {
         cleanup {
             sh 'docker system prune -f || true'
+            sh 'docker logout || true'
         }
     }
 }
