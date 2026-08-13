@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('jenkins-local-to-docker-hub')
-        IMAGE_NAME = "job-application-manager-backend"
+        IMAGE_NAME = "${DOCKERHUB_CREDENTIALS_USR}/job-application-manager-backend"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -165,6 +165,7 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
+                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
                 sh "docker push ${IMAGE_NAME}:latest"
             }
