@@ -40,11 +40,11 @@ pipeline {
         //     }
         // }
 
-        // stage('Build Test Image') {
-        //     steps {
-        //         sh 'docker build --no-cache --pull --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
-        //     }
-        // }
+        stage('Build Test Image') {
+            steps {
+                sh 'docker build --no-cache --pull --target test -t ${IMAGE_NAME}:${IMAGE_TAG}-test .'
+            }
+        }
 
         // stage('Test') {
         //     steps {
