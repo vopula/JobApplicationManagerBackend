@@ -170,6 +170,20 @@ pipeline {
                 sh "docker push ${IMAGE_NAME}:latest"
             }
         }
+
+        stage('Deploy to Server') {
+            steps {
+                withCredentials([
+                    usernamePassword(credentialsId: 'ssh-account-to-isolated-network', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS'),
+                    string(credentialsId: 'isolated-vm-host', variable: 'SSH_HOST')
+                ]) {
+                    sh '''
+                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
+                            "docker compose -f application-docker-compose.yml pull && docker compose -f application-docker-compose.yml up -d"
+                    '''
+                }
+            }
+        }
     }
 
     post {

@@ -1,0 +1,17 @@
+services:
+  app:
+    image: vopula/job-application-manager-backend:latest
+    container_name: job_application_manager_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${JOB_TRACKER_DB_USER}:${JOB_TRACKER_DB_PASSWORD}@job_tracker_db:5432/${JOB_TRACKER_DB_NAME}
+      ENABLE_AI_EXTRACTION: ${ENABLE_AI_EXTRACTION}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    ports:
+      - "8000:8000"
+    networks:
+      - devsecops
+
+networks:
+  devsecops:
+    external: true
