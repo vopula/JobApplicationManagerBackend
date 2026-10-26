@@ -1,25 +1,25 @@
 # Project Title
-DevSecOps Project For Deployment with security check automation.
+DevSecOps CI/CD Pipeline with Automated Security Scanning.
 
 ## Problem Statement
-This job application manager backend doesn't has CI/CD installed for deployment. Without CI/CD, developer tend to do repetitive task with low value and wasting time.
+The Job Application Manager backend did not have a CI/CD pipeline for automated deployment. Without CI/CD automation, developers must perform repetitive deployment tasks manually, reducing productivity.
 
 ## Tech Stack
-Technology stack this project use are Docker, Dockerhub, Jenkins, SonarQube, Trivy, Pytest, Github.
+The technology stack used in this project includes Docker, Dockerhub, Jenkins, SonarQube, Trivy, Pytest, Github.
 
 ## Features
 1. CI/CD pipeline
 2. Auto deployment
-3. SAST, IaC, SCA, Image security scan
+3. SAST, IaC security scanning, SCA, and container image scanning
 
 ## Pipeline Screenshot
 ![Jenkins Pipeline](Images/JenkinsPipeline.png)
 
 ## How to Run Locally
 
-This project uses **two separate `docker compose` files**, because they serve two different purposes and are meant to be deployed independently:
+This project uses **two separate `Docker Compose` files**, because they serve two different purposes and are meant to be deployed independently:
 
-- **`architecture-docker-compose.yml`** — the DevSecOps infrastructure: Jenkins, SonarQube (with its own Postgres), and this app's own Postgres database.
+- **`architecture-docker-compose.yml`** — the DevSecOps infrastructure: Jenkins, SonarQube (with its own Postgres), and the application's PostgreSQL database.
 - **`application-docker-compose.yml`** — just the app itself, pulled as a pre-built image from Docker Hub.
 
 ### 1. Install Docker
@@ -40,8 +40,8 @@ Both compose files below read from this same `.env` automatically.
 ```bash
 docker compose -f architecture-docker-compose.yml up -d
 ```
-- Jenkins → http://localhost:8080 (get the initial admin password with `docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword`)
-- SonarQube → http://localhost:9000 (default login `admin` / `admin`)
+- Jenkins → http://localhost:8080 (Retrieve the initial administrator password using `docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword`)
+- SonarQube → http://localhost:9000 (default credentials: `admin` / `admin`)
 - App's Postgres (`job_tracker_db`) → `localhost:5433`
 
 ### 4. Start the application
@@ -50,7 +50,7 @@ docker compose -f application-docker-compose.yml up -d
 ```
 - App → http://localhost:8000 (docs at `/docs`, health check at `/health`)
 
-Once everything above is running, `docker ps` should show all containers up and healthy:
+Once all services are running, verify their status using `docker ps` should show all containers up and healthy:
 ![Container overview](Images/container_overview_as_output.png)
 
 ### Networking
@@ -68,7 +68,7 @@ Both compose files share **one external Docker network** called `devsecops`, so 
 > Fix by either running step 3 first, or creating the network manually: `docker network create devsecops`.
 
 ## CI/CD Configuration
-Starting the containers isn't enough — Jenkins, GitHub, SonarQube, Trivy, Docker Hub, and the deploy server also need to be wired together (one-time, manual setup) before the pipeline works end-to-end.
+Starting the containers isn't enough — Jenkins, GitHub, SonarQube, Trivy, Docker Hub, and the deploy server also need to be configured to communicate with one another (one-time manual configuration) before the pipeline works end-to-end.
 
 ### Jenkins → GitHub
 This project targets an isolated network with no inbound path for a GitHub webhook, so the `Jenkinsfile` uses `pollSCM('H/5 * * * *')` — Jenkins polls GitHub for new commits every ~5 minutes, instead of GitHub pushing to Jenkins. If your Jenkins is publicly reachable, you can swap this for a real webhook instead (GitHub repo → `Settings → Webhooks` → point to `http://<jenkins-url>/github-webhook/`) for instant triggers.
@@ -82,7 +82,7 @@ This project targets an isolated network with no inbound path for a GitHub webho
 For the `Quality Gate` stage to resolve instead of hanging until timeout, SonarQube needs to call Jenkins back once analysis finishes: in SonarQube, go to `Administration → Configuration → Webhooks` → Create → Name `Jenkins`, URL `http://jenkins:8080/sonarqube-webhook/` (container hostname, same network, **trailing slash required**).
 
 ### Jenkins → Trivy
-No credentials needed. Trivy runs as a short-lived container per scan (`docker create` → `docker start` → `docker rm`), which the Jenkins container can spin up because `/var/run/docker.sock` is mounted into it (already configured in the `jenkins` service of `architecture-docker-compose.yml`).
+No additional credentials are required. Trivy runs as a short-lived container per scan (`docker create` → `docker start` → `docker rm`), which the Jenkins container can spin up because `/var/run/docker.sock` is mounted into it (already configured in the `jenkins` service of `architecture-docker-compose.yml`).
 
 ### Jenkins → Docker Hub
 `Manage Jenkins → Credentials` → Add credential, type **Username with password**, ID `jenkins-local-to-docker-hub`. Username = your Docker Hub username, Password = a Docker Hub **Access Token** (not your account password — required with 2FA, and safer regardless). The `Jenkinsfile` binds this as `DOCKERHUB_CREDENTIALS` and derives `IMAGE_NAME` from `DOCKERHUB_CREDENTIALS_USR` automatically, so images always get pushed under your own namespace, not Docker's reserved `library/` namespace.
